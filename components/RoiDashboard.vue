@@ -165,20 +165,30 @@ function priorityTone(priority: TicketPriority) {
 function statusLabel(status: TicketStatus) {
   return {
     new: '待初诊',
+    assigned: '已指派',
     diagnosed: '已初诊',
     pending_confirmation: '待确认',
-    confirmed: '已确认',
-    escalated: '已升级'
+    dispatching: '派工中',
+    repairing: '维修中',
+    replacement_review: '换新审批',
+    refund_review: '退款复核',
+    escalated: '已升级',
+    closed: '已关闭'
   }[status]
 }
 
 function statusTone(status: TicketStatus) {
   return {
     new: '',
+    assigned: 'blue',
     diagnosed: 'blue',
     pending_confirmation: 'amber',
-    confirmed: 'green',
-    escalated: 'red'
+    dispatching: 'blue',
+    repairing: 'blue',
+    replacement_review: 'amber',
+    refund_review: 'amber',
+    escalated: 'red',
+    closed: 'green'
   }[status]
 }
 </script>

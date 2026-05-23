@@ -22,7 +22,12 @@
           <el-option label="待初诊" value="new" />
           <el-option label="已初诊" value="diagnosed" />
           <el-option label="待确认" value="pending_confirmation" />
+          <el-option label="派工中" value="dispatching" />
+          <el-option label="维修中" value="repairing" />
+          <el-option label="换新审批" value="replacement_review" />
+          <el-option label="退款复核" value="refund_review" />
           <el-option label="已升级" value="escalated" />
+          <el-option label="已关闭" value="closed" />
         </el-select>
       </div>
 
@@ -108,20 +113,30 @@ function priorityTone(value: TicketPriority) {
 function statusLabel(value: TicketStatus) {
   return {
     new: '待初诊',
+    assigned: '已指派',
     diagnosed: '已初诊',
     pending_confirmation: '待确认',
-    confirmed: '已确认',
-    escalated: '已升级'
+    dispatching: '派工中',
+    repairing: '维修中',
+    replacement_review: '换新审批',
+    refund_review: '退款复核',
+    escalated: '已升级',
+    closed: '已关闭'
   }[value]
 }
 
 function statusTone(value: TicketStatus) {
   return {
     new: '',
+    assigned: 'blue',
     diagnosed: 'blue',
     pending_confirmation: 'amber',
-    confirmed: 'green',
-    escalated: 'red'
+    dispatching: 'blue',
+    repairing: 'blue',
+    replacement_review: 'amber',
+    refund_review: 'amber',
+    escalated: 'red',
+    closed: 'green'
   }[value]
 }
 </script>

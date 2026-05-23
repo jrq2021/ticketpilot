@@ -64,6 +64,10 @@
         <TicketDetail :ticket="selectedTicket" @refresh="refreshAll" />
       </section>
 
+      <section v-else-if="activePanel === 'ai-quality'" class="section">
+        <AiQualityDashboard :metrics="aiQualityMetrics || null" />
+      </section>
+
       <section v-else class="section">
         <div class="workbench-grid">
           <TicketQueue
@@ -79,10 +83,10 @@
 </template>
 
 <script setup lang="ts">
-import { BarChart3, GitBranch, Headphones, RefreshCcw, Workflow } from 'lucide-vue-next'
-import type { RoiMetric, TicketWithRelations } from '../types/serviceops.ts'
+import { BarChart3, BrainCircuit, GitBranch, Headphones, RefreshCcw, Workflow } from 'lucide-vue-next'
+import type { AiQualityMetric, RoiMetric, TicketWithRelations } from '../types/serviceops.ts'
 
-type PanelKey = 'dashboard' | 'workbench' | 'trace'
+type PanelKey = 'dashboard' | 'workbench' | 'trace' | 'ai-quality'
 
 const config = useRuntimeConfig()
 const activePanel = ref<PanelKey>('dashboard')
@@ -110,9 +114,25 @@ const { data: tickets, refresh: refreshTickets } = await useFetch<TicketWithRela
   default: () => []
 })
 
+const { data: aiQualityMetrics, refresh: refreshAiQuality } = await useFetch<AiQualityMetric>('/api/metrics/ai-quality', {
+  default: () => ({
+    totalDiagnosedTickets: 0,
+    averageConfidence: 0,
+    lowConfidenceCount: 0,
+    humanAdoptionRate: 0,
+    riskInterceptionCount: 0,
+    averageSavedMinutes: 0,
+    warrantyReviewCount: 0,
+    confidenceDistribution: [],
+    actionTypeDistribution: [],
+    riskFlagDistribution: []
+  })
+})
+
 const navItems = [
   { key: 'dashboard' as const, label: 'ROI 看板', icon: BarChart3 },
   { key: 'workbench' as const, label: '坐席工作台', icon: Headphones },
+  { key: 'ai-quality' as const, label: 'AI 评测', icon: BrainCircuit },
   { key: 'trace' as const, label: 'Agent 追踪', icon: Workflow }
 ]
 
@@ -125,6 +145,7 @@ const title = computed(() => {
   return {
     dashboard: '售后运营 ROI',
     workbench: '工单处理工作台',
+    'ai-quality': 'AI 模型质量评测',
     trace: 'AI 可审计链路'
   }[activePanel.value]
 })
@@ -133,6 +154,7 @@ const subtitle = computed(() => {
   return {
     dashboard: '按节省工时、成本、自动分流和风险工单衡量 AI 投入产出',
     workbench: 'AI 生成初诊、证据引用、回复草稿，坐席确认后执行',
+    'ai-quality': '置信度、采纳率、风险拦截等核心质量指标',
     trace: '展示检索、质保判断、风控和建议生成过程'
   }[activePanel.value]
 })
@@ -144,7 +166,7 @@ watch(tickets, (list) => {
 }, { immediate: true })
 
 async function refreshAll() {
-  await Promise.all([refreshTickets(), refreshMetrics()])
+  await Promise.all([refreshTickets(), refreshMetrics(), refreshAiQuality()])
 }
 
 function openTicket(id: string) {

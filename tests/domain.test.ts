@@ -318,3 +318,131 @@ test("normalizeAgentRecommendation handles missing fields without crashing", () 
   assert.ok(Array.isArray(recommendation.suggestedActions));
   assert.ok(Array.isArray(recommendation.riskFlags));
 });
+
+// ---- Repository tests ----
+
+test("MemoryRepository returns tickets from seed data", async () => {
+  const { MemoryRepository } =
+    await import("../server/repositories/memory.repository.ts");
+  const repo = new MemoryRepository();
+
+  const tickets = await repo.listTickets();
+  assert.ok(tickets.length >= 30, "应至少有 30 条工单");
+
+  const ticket = await repo.getTicketById("tkt-24001");
+  assert.ok(ticket);
+  assert.equal(ticket.title, "空气管家反复 E11，用户要求换新");
+});
+
+test("MemoryRepository upsertRecommendation and upsertActionDraft work", async () => {
+  const { MemoryRepository } =
+    await import("../server/repositories/memory.repository.ts");
+  const repo = new MemoryRepository();
+
+  // upsert recommendation
+  const rec = {
+    id: "rec-test-upsert",
+    ticketId: "tkt-24016",
+    conclusion: "测试结论",
+    confidence: 0.85,
+    warrantyStatus: "valid" as const,
+    evidence: [],
+    suggestedActions: ["测试"],
+    riskFlags: ["测试风险"],
+    nextBestAction: "dispatch" as const,
+    humanConfirmationRequired: true,
+    trace: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  await repo.upsertRecommendation(rec);
+  const found = await repo.getRecommendationByTicketId("tkt-24016");
+  assert.ok(found);
+  assert.equal(found.conclusion, "测试结论");
+
+  // upsert action draft
+  const draft = {
+    id: "draft-test-upsert",
+    ticketId: "tkt-24016",
+    reply: "测试回复",
+    actionType: "dispatch" as const,
+    requiredHumanConfirmation: true,
+    checklist: ["核对"],
+    createdAt: new Date().toISOString(),
+  };
+
+  await repo.upsertActionDraft(draft);
+  const foundDraft = await repo.getActionDraftByTicketId("tkt-24016");
+  assert.ok(foundDraft);
+  assert.equal(foundDraft.reply, "测试回复");
+});
+
+test("upsertRecommendation updates ticket status for new tickets", async () => {
+  const { MemoryRepository } =
+    await import("../server/repositories/memory.repository.ts");
+  const { upsertRecommendation } = await import("../server/utils/domain.ts");
+  const repo = new MemoryRepository();
+
+  const rec = {
+    id: "rec-new-status",
+    ticketId: "tkt-24001",
+    conclusion: "保内诊断",
+    confidence: 0.9,
+    warrantyStatus: "valid" as const,
+    evidence: [],
+    suggestedActions: ["测试"],
+    riskFlags: [],
+    nextBestAction: "dispatch" as const,
+    humanConfirmationRequired: false,
+    trace: [],
+    createdAt: new Date().toISOString(),
+  };
+
+  await upsertRecommendation(repo, rec);
+
+  const ticket = await repo.getTicketById("tkt-24001");
+  assert.ok(ticket);
+  // 高置信度 new ticket 应该变成 diagnosed
+  assert.ok(
+    ticket.status === "diagnosed" || ticket.status === "pending_confirmation",
+    `Expected diagnosed or pending_confirmation, got ${ticket.status}`,
+  );
+});
+
+test("confirm-action updates ticket status and timeline in memory", async () => {
+  const { MemoryRepository } =
+    await import("../server/repositories/memory.repository.ts");
+  const { appendTimelineEvent, mapActionToStatus } =
+    await import("../server/utils/domain.ts");
+  const repo = new MemoryRepository();
+
+  const ticket = await repo.getTicketById("tkt-24002");
+  assert.ok(ticket);
+
+  const beforeTimelineLen = ticket.timeline.length;
+  ticket.status = mapActionToStatus("dispatch");
+  ticket.confirmedAction = {
+    type: "dispatch",
+    note: "测试确认派工",
+    confirmedAt: new Date().toISOString(),
+  };
+
+  appendTimelineEvent(ticket, {
+    at: new Date().toISOString(),
+    type: "agent",
+    title: "坐席确认派工",
+    detail: "测试时间线追加",
+    actor: "测试坐席",
+  });
+
+  await repo.updateTicket(ticket);
+
+  const updated = await repo.getTicketById("tkt-24002");
+  assert.ok(updated);
+  assert.equal(updated.status, "dispatching");
+  assert.equal(updated.timeline.length, beforeTimelineLen + 1);
+  assert.equal(
+    updated.timeline[updated.timeline.length - 1].title,
+    "坐席确认派工",
+  );
+});

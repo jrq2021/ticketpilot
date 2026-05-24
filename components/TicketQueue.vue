@@ -3,14 +3,21 @@
     <div class="panel-header">
       <div>
         <h2>工单队列</h2>
-        <p class="muted">{{ filteredTickets.length }} / {{ tickets.length }} 条</p>
+        <p class="muted">
+          {{ filteredTickets.length }} / {{ tickets.length }} 条
+        </p>
       </div>
       <ListFilter :size="20" />
     </div>
 
     <div class="panel-body">
       <div class="toolbar section">
-        <el-input v-model="keyword" clearable placeholder="订单、客户、问题" :prefix-icon="SearchIcon" />
+        <el-input
+          v-model="keyword"
+          clearable
+          placeholder="订单、客户、问题"
+          :prefix-icon="SearchIcon"
+        />
         <el-select v-model="priority" placeholder="优先级">
           <el-option label="全部" value="all" />
           <el-option label="P0/P1" value="urgent" />
@@ -41,14 +48,21 @@
           @click="$emit('select', ticket.id)"
         >
           <div class="ticket-row-top">
-            <span class="pill" :class="priorityTone(ticket.priority)">{{ priorityLabel(ticket.priority) }}</span>
+            <span class="pill" :class="priorityTone(ticket.priority)">{{
+              priorityLabel(ticket.priority)
+            }}</span>
             <span class="pill">{{ ticket.channel }}</span>
           </div>
           <div class="ticket-title">{{ ticket.title }}</div>
           <div class="ticket-meta">
             <span class="pill">{{ ticket.customer.name }}</span>
             <span class="pill blue">{{ ticket.product.model }}</span>
-            <span class="pill" :class="statusTone(ticket.status)">{{ statusLabel(ticket.status) }}</span>
+            <span class="pill" :class="statusTone(ticket.status)">{{
+              statusLabel(ticket.status)
+            }}</span>
+            <span v-if="ticket.tags.includes('推荐演示')" class="pill amber"
+              >⭐ 推荐演示</span
+            >
           </div>
         </button>
       </div>
@@ -57,86 +71,94 @@
 </template>
 
 <script setup lang="ts">
-import { ListFilter } from 'lucide-vue-next'
-import { Search as SearchIcon } from '@element-plus/icons-vue'
-import type { TicketPriority, TicketStatus, TicketWithRelations } from '../types/serviceops.ts'
+import { ListFilter } from "lucide-vue-next";
+import { Search as SearchIcon } from "@element-plus/icons-vue";
+import type {
+  TicketPriority,
+  TicketStatus,
+  TicketWithRelations,
+} from "../types/serviceops.ts";
 
 defineEmits<{
-  select: [id: string]
-}>()
+  select: [id: string];
+}>();
 
 const props = defineProps<{
-  tickets: TicketWithRelations[]
-  selectedId?: string
-}>()
+  tickets: TicketWithRelations[];
+  selectedId?: string;
+}>();
 
-const keyword = ref('')
-const priority = ref<TicketPriority | 'all'>('all')
-const status = ref<TicketStatus | 'all'>('all')
+const keyword = ref("");
+const priority = ref<TicketPriority | "all">("all");
+const status = ref<TicketStatus | "all">("all");
 
 const filteredTickets = computed(() => {
-  const normalized = keyword.value.trim().toLowerCase()
+  const normalized = keyword.value.trim().toLowerCase();
 
   return props.tickets.filter((ticket) => {
-    const matchesKeyword = !normalized || [
-      ticket.orderNo,
-      ticket.title,
-      ticket.customer.name,
-      ticket.product.name,
-      ticket.issue
-    ].some((value) => value.toLowerCase().includes(normalized))
-    const matchesPriority = priority.value === 'all' || ticket.priority === priority.value
-    const matchesStatus = status.value === 'all' || ticket.status === status.value
+    const matchesKeyword =
+      !normalized ||
+      [
+        ticket.orderNo,
+        ticket.title,
+        ticket.customer.name,
+        ticket.product.name,
+        ticket.issue,
+      ].some((value) => value.toLowerCase().includes(normalized));
+    const matchesPriority =
+      priority.value === "all" || ticket.priority === priority.value;
+    const matchesStatus =
+      status.value === "all" || ticket.status === status.value;
 
-    return matchesKeyword && matchesPriority && matchesStatus
-  })
-})
+    return matchesKeyword && matchesPriority && matchesStatus;
+  });
+});
 
 function priorityLabel(value: TicketPriority) {
   return {
-    urgent: 'P0/P1',
-    high: '高优先级',
-    medium: '普通',
-    low: '低优先级'
-  }[value]
+    urgent: "P0/P1",
+    high: "高优先级",
+    medium: "普通",
+    low: "低优先级",
+  }[value];
 }
 
 function priorityTone(value: TicketPriority) {
   return {
-    urgent: 'red',
-    high: 'amber',
-    medium: 'blue',
-    low: 'green'
-  }[value]
+    urgent: "red",
+    high: "amber",
+    medium: "blue",
+    low: "green",
+  }[value];
 }
 
 function statusLabel(value: TicketStatus) {
   return {
-    new: '待初诊',
-    assigned: '已指派',
-    diagnosed: '已初诊',
-    pending_confirmation: '待确认',
-    dispatching: '派工中',
-    repairing: '维修中',
-    replacement_review: '换新审批',
-    refund_review: '退款复核',
-    escalated: '已升级',
-    closed: '已关闭'
-  }[value]
+    new: "待初诊",
+    assigned: "已指派",
+    diagnosed: "已初诊",
+    pending_confirmation: "待确认",
+    dispatching: "派工中",
+    repairing: "维修中",
+    replacement_review: "换新审批",
+    refund_review: "退款复核",
+    escalated: "已升级",
+    closed: "已关闭",
+  }[value];
 }
 
 function statusTone(value: TicketStatus) {
   return {
-    new: '',
-    assigned: 'blue',
-    diagnosed: 'blue',
-    pending_confirmation: 'amber',
-    dispatching: 'blue',
-    repairing: 'blue',
-    replacement_review: 'amber',
-    refund_review: 'amber',
-    escalated: 'red',
-    closed: 'green'
-  }[value]
+    new: "",
+    assigned: "blue",
+    diagnosed: "blue",
+    pending_confirmation: "amber",
+    dispatching: "blue",
+    repairing: "blue",
+    replacement_review: "amber",
+    refund_review: "amber",
+    escalated: "red",
+    closed: "green",
+  }[value];
 }
 </script>

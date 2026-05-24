@@ -9,3 +9,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 dev-server*.log
+
+# 个人面试/求职材料（不上传公开仓库）
+docs/INTERVIEW_SCRIPT.md
+docs/RELEASE_CHECKLIST.md
+docs/MONEY_GOAL_PLAN.md

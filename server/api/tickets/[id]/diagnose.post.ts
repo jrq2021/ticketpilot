@@ -1,15 +1,19 @@
-import { getStore } from "../../../data/seed.ts";
+import { createRepository } from "../../../repositories/factory.ts";
 import { createAiProvider } from "../../../utils/ai.ts";
 import {
   findPolicyForProduct,
-  normalizeAgentRecommendation,
   searchKnowledge,
   upsertRecommendation,
 } from "../../../utils/domain.ts";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
-  const store = getStore();
+  const repo = createRepository({
+    dataProvider: runtimeConfig.dataProvider,
+    supabaseUrl: runtimeConfig.supabaseUrl,
+    supabaseServiceRoleKey: runtimeConfig.supabaseServiceRoleKey
+  });
+  const store = await repo.getStoreSnapshot();
   const ticket = store.tickets.find((item) => item.id === id);
 
   if (!ticket) {
@@ -36,7 +40,7 @@ export default defineEventHandler(async (event) => {
     model: runtimeConfig.openaiModel,
   }).diagnose({ ticket, product, policy, evidence });
 
-  upsertRecommendation(store, result.recommendation);
+  upsertRecommendation(repo, result.recommendation);
 
   return result;
 });

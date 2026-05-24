@@ -18,7 +18,7 @@ import type {
   WarrantyPolicy,
   WarrantyStatus,
 } from "../../types/serviceops.ts";
-
+import type { ServiceOpsRepository } from "../repositories/serviceops.repository.ts";
 export const COST_PER_AGENT_MINUTE = 4.8;
 export const NOW = new Date("2026-05-23T09:00:00.000Z");
 
@@ -385,10 +385,11 @@ export function buildActionDraft(
   };
 }
 
-export function upsertRecommendation(
-  store: ServiceOpsStore,
+export async function upsertRecommendation(
+  repo: ServiceOpsRepository,
   recommendation: AgentRecommendation,
 ) {
+  const store = await repo.getStoreSnapshot();
   const index = store.recommendations.findIndex(
     (item) => item.ticketId === recommendation.ticketId,
   );
@@ -405,10 +406,17 @@ export function upsertRecommendation(
   if (ticket && ticket.status === "new") {
     ticket.status =
       recommendation.confidence < 0.72 ? "pending_confirmation" : "diagnosed";
+    await repo.updateTicket(ticket);
   }
+
+  await repo.upsertRecommendation(recommendation);
 }
 
-export function upsertActionDraft(store: ServiceOpsStore, draft: ActionDraft) {
+export async function upsertActionDraft(
+  repo: ServiceOpsRepository,
+  draft: ActionDraft,
+) {
+  const store = await repo.getStoreSnapshot();
   const index = store.actionDrafts.findIndex(
     (item) => item.ticketId === draft.ticketId,
   );
@@ -432,7 +440,10 @@ export function upsertActionDraft(store: ServiceOpsStore, draft: ActionDraft) {
     ].includes(ticket.status)
   ) {
     ticket.status = "pending_confirmation";
+    await repo.updateTicket(ticket);
   }
+
+  await repo.upsertActionDraft(draft);
 }
 
 const DIAGNOSED_STATUSES: TicketStatus[] = [

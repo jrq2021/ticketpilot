@@ -354,7 +354,7 @@ const tickets: Ticket[] = [
     status: "new",
     estimatedManualMinutes: 42,
     aiAssistedMinutes: 13,
-    tags: ["P0", "企业客户", "派工"],
+    tags: ["P0", "企业客户", "派工", "推荐演示"],
     timeline: [
       {
         id: "tle-24002-1",
@@ -521,7 +521,7 @@ const tickets: Ticket[] = [
     status: "escalated",
     estimatedManualMinutes: 38,
     aiAssistedMinutes: 16,
-    tags: ["进水风险", "争议", "主管复核"],
+    tags: ["进水风险", "争议", "主管复核", "推荐演示"],
     timeline: [
       {
         id: "tle-24005-1",
@@ -796,7 +796,7 @@ const tickets: Ticket[] = [
     status: "refund_review",
     estimatedManualMinutes: 35,
     aiAssistedMinutes: 12,
-    tags: ["退款诉求", "短期使用", "情绪高风险"],
+    tags: ["退款诉求", "短期使用", "情绪高风险", "推荐演示"],
     timeline: [
       {
         id: "tle-24009-1",

@@ -1,6 +1,12 @@
-import { getStore } from '../../data/seed.ts'
-import { calculateRoiMetrics } from '../../utils/domain.ts'
+import { createRepository } from "../../repositories/factory.ts";
+import { calculateRoiMetrics } from "../../utils/domain.ts";
 
-export default defineEventHandler(() => {
-  return calculateRoiMetrics(getStore())
-})
+export default defineEventHandler(async () => {
+  const config = useRuntimeConfig();
+  const repo = createRepository({
+    dataProvider: config.dataProvider,
+    supabaseUrl: config.supabaseUrl,
+    supabaseServiceRoleKey: config.supabaseServiceRoleKey
+  });
+  return calculateRoiMetrics(await repo.getStoreSnapshot());
+});

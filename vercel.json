@@ -1,0 +1,6 @@
+{
+  "env": {
+    "DATA_PROVIDER": "memory",
+    "NUXT_PUBLIC_AI_PROVIDER": "mock"
+  }
+}

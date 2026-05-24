@@ -8,10 +8,11 @@ import {
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
+  const runtimeConfig = useRuntimeConfig();
   const repo = createRepository({
     dataProvider: runtimeConfig.dataProvider,
     supabaseUrl: runtimeConfig.supabaseUrl,
-    supabaseServiceRoleKey: runtimeConfig.supabaseServiceRoleKey
+    supabaseServiceRoleKey: runtimeConfig.supabaseServiceRoleKey,
   });
   const store = await repo.getStoreSnapshot();
   const ticket = store.tickets.find((item) => item.id === id);
@@ -31,16 +32,15 @@ export default defineEventHandler(async (event) => {
     product,
     store.knowledgeDocs,
   );
-  const runtimeConfig = useRuntimeConfig();
 
   const result = await createAiProvider({
     provider: runtimeConfig.public.aiProvider,
     apiKey: runtimeConfig.openaiApiKey,
     baseUrl: runtimeConfig.openaiBaseUrl,
     model: runtimeConfig.openaiModel,
-  }).diagnose({ ticket, product, policy, evidence });
+  }).diagnose({ ticket, product, policy, evidence, retrievalTrace });
 
-  upsertRecommendation(repo, result.recommendation);
+  await upsertRecommendation(repo, result.recommendation);
 
   return result;
 });

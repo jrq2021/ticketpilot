@@ -5,20 +5,29 @@ import { SupabaseRepository } from "./supabase.repository.ts";
 let cachedRepo: ServiceOpsRepository | null = null;
 
 export interface RepositoryConfig {
-  dataProvider?: string
-  supabaseUrl?: string
-  supabaseServiceRoleKey?: string
+  dataProvider?: string;
+  supabaseUrl?: string;
+  supabaseServiceRoleKey?: string;
 }
 
-export function createRepository(config?: RepositoryConfig): ServiceOpsRepository {
+export function createRepository(
+  config?: RepositoryConfig,
+): ServiceOpsRepository {
   if (cachedRepo) return cachedRepo;
 
   // 优先使用传入的 config，fallback 到 process.env（兼容测试和本地开发）
-  const provider = (config?.dataProvider || process.env.DATA_PROVIDER || "memory").toLowerCase();
+  const provider = (
+    config?.dataProvider ||
+    process.env.DATA_PROVIDER ||
+    "memory"
+  ).toLowerCase();
 
   if (provider === "supabase") {
     const url = config?.supabaseUrl || process.env.SUPABASE_URL || "";
-    const key = config?.supabaseServiceRoleKey || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+    const key =
+      config?.supabaseServiceRoleKey ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      "";
 
     if (!url || !key) {
       console.warn(

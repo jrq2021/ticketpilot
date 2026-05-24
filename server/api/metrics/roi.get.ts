@@ -6,7 +6,7 @@ export default defineEventHandler(async () => {
   const repo = createRepository({
     dataProvider: config.dataProvider,
     supabaseUrl: config.supabaseUrl,
-    supabaseServiceRoleKey: config.supabaseServiceRoleKey
+    supabaseServiceRoleKey: config.supabaseServiceRoleKey,
   });
   return calculateRoiMetrics(await repo.getStoreSnapshot());
 });

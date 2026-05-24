@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const repo = createRepository({
     dataProvider: config.dataProvider,
     supabaseUrl: config.supabaseUrl,
-    supabaseServiceRoleKey: config.supabaseServiceRoleKey
+    supabaseServiceRoleKey: config.supabaseServiceRoleKey,
   });
   const store = await repo.getStoreSnapshot();
   const id = getRouterParam(event, "id");

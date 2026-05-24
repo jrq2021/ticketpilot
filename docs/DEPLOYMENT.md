@@ -32,10 +32,10 @@ git push origin main
 
 ### 3.1 Memory + Mock 模式（零配置，默认）
 
-| 变量 | 值 | 说明 |
-|------|-----|------|
-| `DATA_PROVIDER` | `memory` | 使用内存种子数据 |
-| `NUXT_PUBLIC_AI_PROVIDER` | `mock` | 使用规则引擎 AI |
+| 变量                      | 值       | 说明             |
+| ------------------------- | -------- | ---------------- |
+| `DATA_PROVIDER`           | `memory` | 使用内存种子数据 |
+| `NUXT_PUBLIC_AI_PROVIDER` | `mock`   | 使用规则引擎 AI  |
 
 > 这两个变量已在 `vercel.json` 中预设，导入项目即可部署。
 
@@ -43,12 +43,12 @@ git push origin main
 
 在 Vercel Dashboard → Settings → Environment Variables 中添加：
 
-| 变量 | 值 |
-|------|-----|
-| `NUXT_PUBLIC_AI_PROVIDER` | `openai` |
-| `OPENAI_BASE_URL` | `https://api.deepseek.com/v1` |
-| `OPENAI_API_KEY` | `sk-你的DeepSeek密钥` |
-| `OPENAI_MODEL` | `deepseek-chat` |
+| 变量                      | 值                            |
+| ------------------------- | ----------------------------- |
+| `NUXT_PUBLIC_AI_PROVIDER` | `openai`                      |
+| `OPENAI_BASE_URL`         | `https://api.deepseek.com/v1` |
+| `OPENAI_API_KEY`          | `sk-你的DeepSeek密钥`         |
+| `OPENAI_MODEL`            | `deepseek-chat`               |
 
 > ⚠️ `OPENAI_API_KEY` 是服务端密钥，Vercel 不会暴露给前端。但 `NUXT_PUBLIC_*` 前缀的变量会暴露——这里 `NUXT_PUBLIC_AI_PROVIDER` 只有 `"mock"` 或 `"openai"` 两个值，不含密钥。
 
@@ -56,11 +56,11 @@ git push origin main
 
 在 3.2 的基础上，再添加：
 
-| 变量 | 值 |
-|------|-----|
-| `DATA_PROVIDER` | `supabase` |
-| `SUPABASE_URL` | `https://你的项目.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | `你的 Service Role Key` |
+| 变量                        | 值                             |
+| --------------------------- | ------------------------------ |
+| `DATA_PROVIDER`             | `supabase`                     |
+| `SUPABASE_URL`              | `https://你的项目.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | `你的 Service Role Key`        |
 
 > ⚠️ `SUPABASE_SERVICE_ROLE_KEY` 拥有绕过 RLS 的完整权限，绝不能出现在前端代码或 Git 仓库中。只在 Vercel 环境变量中配置。
 
@@ -120,10 +120,10 @@ A：Memory + Mock 模式几乎不消耗资源，免费层完全够用。DeepSeek
 
 ## 六、安全提醒
 
-| 检查项 | 状态 |
-|--------|------|
-| `.env` 已加入 `.gitignore` | ✅ |
-| `OPENAI_API_KEY` 不在 Git 仓库中 | ✅ |
-| `SUPABASE_SERVICE_ROLE_KEY` 只在 Vercel 环境变量 | ✅ |
-| `NUXT_PUBLIC_*` 前缀变量不含密钥 | ✅ |
-| README 中的示例 Key 都是占位符 `sk-your-key` | ✅ |
+| 检查项                                           | 状态 |
+| ------------------------------------------------ | ---- |
+| `.env` 已加入 `.gitignore`                       | ✅   |
+| `OPENAI_API_KEY` 不在 Git 仓库中                 | ✅   |
+| `SUPABASE_SERVICE_ROLE_KEY` 只在 Vercel 环境变量 | ✅   |
+| `NUXT_PUBLIC_*` 前缀变量不含密钥                 | ✅   |
+| README 中的示例 Key 都是占位符 `sk-your-key`     | ✅   |
